@@ -1,5 +1,10 @@
 # moxy ws mock
 
+## Purpose
+
+This can be used to send websocket messages to moxy. https://github.com/mattinordstrom/moxy    
+  
+    
 ## Setup
 
 Create a virtual env:
