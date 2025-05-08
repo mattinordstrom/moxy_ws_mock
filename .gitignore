@@ -1,2 +1,4 @@
 .moxy_ws_venv
 __pycache__/
+files/*
+!files/example
