@@ -1,3 +1,4 @@
+import os
 import asyncio
 import argparse
 from websockets.asyncio.client import connect
@@ -10,6 +11,7 @@ def parse_arguments():
     parser.add_argument("-i", type=int, metavar="INTERVAL", default=3, help="Set the interval in seconds (default: 3). Set to 0 to send only once.")
     parser.add_argument("-m", type=str, metavar="MESSAGE", default="Hello world!", help="Message to send. (Will be used if file argument is not set.)")
     parser.add_argument("-f", type=str, metavar="FILE", default="", help="File name of a file in the /files path. (If set, file content will be used instead of the message argument.)")
+    parser.add_argument("-l", action="store_true", help="List available files in the /files directory.")
     
     return parser.parse_args()
 
@@ -27,6 +29,14 @@ async def main():
     message = args.m
     file = args.f
 
+    if args.l:
+        files = os.listdir("files")
+        print("Available files:")
+        for f in files:
+            print(f"- {f}")
+        print("\n")
+        return
+    
     uri = f"ws://localhost:{port}/moxywsmock"
 
     if file:
