@@ -49,4 +49,9 @@ async def main():
             break
         await asyncio.sleep(interval)
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nProgram interrupted by user. Exiting...")
