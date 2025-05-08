@@ -20,6 +20,11 @@ Install requirements:
     pip3 install -r requirements.txt
 
 
-## Run
+## Help
 
-    python3 main.py
+    python3 main.py --help
+
+
+## Simple run
+
+    python3 main.py -i 0
