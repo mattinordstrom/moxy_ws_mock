@@ -5,6 +5,8 @@ from websockets.asyncio.client import connect
 
 # python3 main.py -f "example2" -i 0
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="MOXY WebSocket message sender.")
     parser.add_argument("-p", type=int, metavar="PORT", default=9097, help="Set the port (default: 9097)")
@@ -30,7 +32,7 @@ async def main():
     file = args.f
 
     if args.l:
-        files = os.listdir("files")
+        files = os.listdir(os.path.join(BASE_DIR, "files"))
         print("Available files:")
         for f in files:
             print(f"- {f}")
@@ -40,7 +42,8 @@ async def main():
     uri = f"ws://localhost:{port}/moxywsmock"
 
     if file:
-        with open(f"files/{file}", "r", encoding="utf-8") as f:
+        file_path = os.path.join(BASE_DIR, "files", file)
+        with open(file_path, "r", encoding="utf-8") as f:
             message = f.read().strip()
 
     while True:
