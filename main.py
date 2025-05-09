@@ -3,8 +3,6 @@ import asyncio
 import argparse
 from websockets.asyncio.client import connect
 
-# python3 main.py -f "example2" -i 0
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def parse_arguments():
