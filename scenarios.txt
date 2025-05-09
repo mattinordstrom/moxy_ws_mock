@@ -1,0 +1,25 @@
+SCENARIOS:
+
+Run on strange port should result in error
+moxyws -p 1050
+
+List files in /files
+moxyws -l
+
+Simple Run (run Hello world! forever with 3000ms interval)
+moxyws
+
+Running with message and no interval
+moxyws -m "Test single message" -i 0  
+
+Running with message and interval
+moxyws -m "Hello there" -i 500  
+
+Running file with single row
+moxyws -f example
+
+Running file with multiple rows and interval
+moxyws -f example2 -i 500  
+
+Running file with multiple rows and 0 interval (should result in error)
+moxyws -f example2 -i 0
