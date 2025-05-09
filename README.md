@@ -28,3 +28,14 @@ Install requirements:
 ## Simple run
 
     python3 main.py -i 0
+
+
+## Add alias
+
+Add to ~/.zshrc:
+
+    alias moxyws="/home/matti/projects/moxy_ws_mock/.moxy_ws_venv/bin/python3 /home/matti/projects/moxy_ws_mock/main.py "$1
+
+then you can just run:
+
+    moxyws -i 0
