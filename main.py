@@ -10,7 +10,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 def parse_arguments():
     parser = argparse.ArgumentParser(description="MOXY WebSocket message sender.")
     parser.add_argument("-p", type=int, metavar="PORT", default=9097, help="Set the port (default: 9097)")
-    parser.add_argument("-i", type=int, metavar="INTERVAL", default=3, help="Set the interval in seconds (default: 3). Set to 0 to send only once.")
+    parser.add_argument("-i", type=int, metavar="INTERVAL", default=3000, help="Set the interval in milliseconds (default: 3000). Set to 0 to send only once.")
     parser.add_argument("-m", type=str, metavar="MESSAGE", default="Hello world!", help="Message to send. (Will be used if file argument is not set.)")
     parser.add_argument("-f", type=str, metavar="FILE", default="", help="File name of a file in the /files path. (If set, file content will be used instead of the message argument.) Each row will be sent as a separate message with the interval set until all rows has been processed.")
     parser.add_argument("-l", action="store_true", help="List available files in the /files directory.")
@@ -19,15 +19,18 @@ def parse_arguments():
 
 
 async def send_message(uri, message):
-    async with connect(uri) as websocket:
-        await websocket.send(message)
-        print(f"> Sent: {message}")
-
+    try:
+        async with connect(uri) as websocket:
+            await websocket.send(message)
+            print(f"> Sent: {message}")
+    except Exception:
+        print(f"Error: Unable to connect to WebSocket server at {uri}. Is the server running?")
+    
 
 async def main():
     args = parse_arguments()
     port = args.p
-    interval = args.i
+    interval = args.i / 1000  # Convert milliseconds to seconds
     message = args.m
     file = args.f
 
