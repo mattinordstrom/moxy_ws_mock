@@ -12,7 +12,7 @@ def parse_arguments():
     parser.add_argument("-p", type=int, metavar="PORT", default=9097, help="Set the port (default: 9097)")
     parser.add_argument("-i", type=int, metavar="INTERVAL", default=3, help="Set the interval in seconds (default: 3). Set to 0 to send only once.")
     parser.add_argument("-m", type=str, metavar="MESSAGE", default="Hello world!", help="Message to send. (Will be used if file argument is not set.)")
-    parser.add_argument("-f", type=str, metavar="FILE", default="", help="File name of a file in the /files path. (If set, file content will be used instead of the message argument.)")
+    parser.add_argument("-f", type=str, metavar="FILE", default="", help="File name of a file in the /files path. (If set, file content will be used instead of the message argument.) Each row will be sent as a separate message with the interval set until all rows has been processed.")
     parser.add_argument("-l", action="store_true", help="List available files in the /files directory.")
     
     return parser.parse_args()
@@ -44,8 +44,21 @@ async def main():
     if file:
         file_path = os.path.join(BASE_DIR, "files", file)
         with open(file_path, "r", encoding="utf-8") as f:
-            message = f.read().strip()
+            messages = [line.strip() for line in f if line.strip()]
+    else:
+        messages = [message]
 
+    if len(messages) > 1:
+        if not interval or interval <= 0:
+            print("Interval can not be 0 for files with multiple rows.")
+            return
+            
+        for msg in messages:
+            await send_message(uri, msg)
+            await asyncio.sleep(interval)
+
+        return
+    
     while True:
         await send_message(uri, message)
         if not interval or interval <= 0:
