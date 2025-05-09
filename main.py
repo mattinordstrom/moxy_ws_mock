@@ -18,13 +18,28 @@ def parse_arguments():
     return parser.parse_args()
 
 
-async def send_message(uri, message):
+async def send_messages(uri, messages, interval, file):
     try:
         async with connect(uri) as websocket:
-            await websocket.send(message)
-            print(f"> Sent: {message}")
-    except Exception:
-        print(f"Error: Unable to connect to WebSocket server at {uri}. Is the server running?")
+            if file:
+                for message in messages:
+                    await websocket.send(message)
+                    print(f"[Sent] {message}")
+
+                    if interval and interval > 0:
+                        await asyncio.sleep(interval)
+                        
+                return
+
+            while True:
+                await websocket.send(messages[0])
+                print(f"[Sent] {messages[0]}")
+
+                if not interval or interval <= 0:
+                    break
+                await asyncio.sleep(interval)
+    except Exception as e:
+        print(f"Error when connecting to moxy at {uri}. Is the server running?")
     
 
 async def main():
@@ -51,23 +66,12 @@ async def main():
     else:
         messages = [message]
 
-    if len(messages) > 1:
-        if not interval or interval <= 0:
-            print("Interval can not be 0 for files with multiple rows.")
-            return
-            
-        for msg in messages:
-            await send_message(uri, msg)
-            await asyncio.sleep(interval)
-
+    if len(messages) > 1 and (not interval or interval <= 0):
+        print("Interval can not be 0 for files with multiple rows.")
         return
-    
-    while True:
-        await send_message(uri, message)
-        if not interval or interval <= 0:
-            break
-        await asyncio.sleep(interval)
-
+                  
+    await send_messages(uri, messages, interval, file)
+  
 
 if __name__ == "__main__":
     try:
