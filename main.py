@@ -3,6 +3,9 @@ import asyncio
 import argparse
 from websockets.asyncio.client import connect
 
+YELLOW = '\033[93m'
+ENDC = '\033[0m'
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def parse_arguments():
@@ -22,7 +25,7 @@ async def send_messages(uri, messages, interval, file):
             if file:
                 for message in messages:
                     await websocket.send(message)
-                    print(f"[Sent] {message}")
+                    print(f"\n{YELLOW}Sent:{ENDC} {message}")
 
                     if interval and interval > 0:
                         await asyncio.sleep(interval)
@@ -31,7 +34,7 @@ async def send_messages(uri, messages, interval, file):
 
             while True:
                 await websocket.send(messages[0])
-                print(f"[Sent] {messages[0]}")
+                print(f"\n{YELLOW}Sent:{ENDC} {messages[0]}")
 
                 if not interval or interval <= 0:
                     break

@@ -12,7 +12,7 @@
             "justMyCode": false,
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "args":["-i", "1000", "-f", "example2"],
+            "args":["-i", "1000", "-f", "example2.jsonl"],
         }
     ]
 }

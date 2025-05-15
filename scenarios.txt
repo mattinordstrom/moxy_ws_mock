@@ -19,7 +19,7 @@ Running file with single row
 moxyws -f example
 
 Running file with multiple rows and interval
-moxyws -f example2 -i 500  
+moxyws -f example2.jsonl -i 500  
 
 Running file with multiple rows and 0 interval (should result in error)
-moxyws -f example2 -i 0
+moxyws -f example2.jsonl -i 0

@@ -2,4 +2,4 @@
 __pycache__/
 files/*
 !files/example
-!files/example2
+!files/example2.jsonl
