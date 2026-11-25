@@ -1,7 +1,9 @@
 import os
+import sys
 import asyncio
 import argparse
 from websockets.asyncio.client import connect
+from websockets.exceptions import ConnectionClosed, InvalidHandshake, InvalidURI
 
 YELLOW = '\033[93m'
 ENDC = '\033[0m'
@@ -19,9 +21,20 @@ def parse_arguments():
     return parser.parse_args()
 
 
+async def discard_incoming(websocket):
+    try:
+        async for _ in websocket:
+            pass
+    except ConnectionClosed:
+        pass
+
+
 async def send_messages(uri, messages, interval, file):
     try:
         async with connect(uri) as websocket:
+            # moxy echoes every message back; unread echoes fill the queue and stall keepalive pongs
+            reader = asyncio.create_task(discard_incoming(websocket))  # noqa: F841 keep a reference so the task isn't garbage collected
+
             if file:
                 for message in messages:
                     await websocket.send(message)
@@ -29,8 +42,8 @@ async def send_messages(uri, messages, interval, file):
 
                     if interval and interval > 0:
                         await asyncio.sleep(interval)
-                        
-                return
+
+                return 0
 
             while True:
                 await websocket.send(messages[0])
@@ -39,9 +52,15 @@ async def send_messages(uri, messages, interval, file):
                 if not interval or interval <= 0:
                     break
                 await asyncio.sleep(interval)
-    except Exception as e:
-        print(f"Error when connecting to moxy at {uri}. Is the server running?")
-    
+    except (OSError, InvalidHandshake, InvalidURI) as e:
+        print(f"Error when connecting to moxy at {uri}. Is the server running? ({e})")
+        return 1
+    except ConnectionClosed as e:
+        print(f"Connection to moxy at {uri} was closed: {e}")
+        return 1
+
+    return 0
+
 
 async def main():
     args = parse_arguments()
@@ -56,13 +75,17 @@ async def main():
         for f in files:
             print(f"- {f}")
         print("\n")
-        return
-    
+        return 0
+
     uri = f"ws://localhost:{port}/moxywsmock"
 
     if file:
         file_path = os.path.join(BASE_DIR, "files", file)
-        
+
+        if not os.path.isfile(file_path):
+            print(f"File not found: {file}. Use -l to list available files.")
+            return 1
+
         # Check if it's a JSON file (not JSONL)
         if file.endswith('.json'):
             with open(file_path, "r", encoding="utf-8") as f:
@@ -73,18 +96,22 @@ async def main():
             # Handle JSONL files (line by line)
             with open(file_path, "r", encoding="utf-8") as f:
                 messages = [line.strip() for line in f if line.strip()]
+        if not messages:
+            print(f"File is empty: {file}")
+            return 1
     else:
         messages = [message]
 
     if len(messages) > 1 and (not interval or interval <= 0):
         print("Interval can not be 0 for files with multiple rows.")
-        return
-                  
-    await send_messages(uri, messages, interval, file)
-  
+        return 1
+
+    return await send_messages(uri, messages, interval, file)
+
 
 if __name__ == "__main__":
     try:
-        asyncio.run(main())
+        sys.exit(asyncio.run(main()))
     except KeyboardInterrupt:
         print("\nProgram interrupted by user. Exiting...")
+        sys.exit(130)
